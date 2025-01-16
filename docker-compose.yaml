@@ -11,20 +11,20 @@ services:
     depends_on:
       - postgres
       - redis
-      - elasticsearch
+      - opensearch
     environment:
       POSTGRES_USER: harbinger
       POSTGRES_PASSWORD: dev12345!
       POSTGRES_DB: harbinger_db
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
-      ELASTICSEARCH_HOST: elasticsearch
+      OPENSEARCH_HOST: opensearch
 
   postgres:
     image: postgres:latest
     container_name: postgres_harbinger
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     environment:
       POSTGRES_USER: harbinger
       POSTGRES_PASSWORD: dev12345!
@@ -45,15 +45,23 @@ services:
     environment:
       REDIS_PASSWORD: admin12345!
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
-    container_name: elasticsearch_server
+  opensearch:
+    image: opensearchproject/opensearch:2.10.0
+    container_name: opensearch_server
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=true 
-      - ELASTIC_PASSWORD=admin12345!
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - plugins.security.disabled=false
+      - admin.username=admin
+      - admin.password=admin12345!
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "9200:9200"
       - "9300:9300"
+
 volumes:
   postgres_data:
