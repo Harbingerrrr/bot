@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  discord_bot:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: discord_bot
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+    environment:
+      POSTGRES_USER: harbinger
+      POSTGRES_PASSWORD: dev12345!
+      POSTGRES_DB: harbinger_db
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      ELASTICSEARCH_HOST: elasticsearch
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_harbinger
+    ports:
+      - "5432:5432" 
+    environment:
+      POSTGRES_USER: harbinger
+      POSTGRES_PASSWORD: dev12345!
+      POSTGRES_DB: harbinger_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: >
+      postgres -c "logging_collector=on" 
+               -c "log_destination=stderr" 
+               -c "log_statement=all"
+
+  redis:
+    image: redis:latest
+    container_name: redis_server
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "admin12345!"]
+    environment:
+      REDIS_PASSWORD: admin12345!
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: elasticsearch_server
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true 
+      - ELASTIC_PASSWORD=admin12345!
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+volumes:
+  postgres_data:

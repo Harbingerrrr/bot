@@ -30,7 +30,6 @@ func Add(session *discordgo.Session, msg *discordgo.MessageCreate, args *[]strin
 
 	// Get user IDs
 	userIDs := util.GetUserIDsFromUsernames(&usernames)
-	fmt.Println(userIDs)
 
 	// Add xp to users (not implemented)
 	addXP(&userIDs, &xp, &groupID)
